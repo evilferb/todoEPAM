@@ -46,52 +46,53 @@ function readTodos(done) {
 function showTodo(id, done) {
 	load((error, todosData)=> {
 		if (error)	return done(error);
+		else {
+			const todo = todosData.find(todo => todo.id === id);
 
-		const todo = todosData.find(todo => todo.id === id);
+			if (!todo) return done(new Error('TODO item not found.'));
 
-		if (!todo) return done(new Error('TODO item not found.'));
-
-		done(null, todo)
+			done(null, todo)
+		};
 	});
 }
 
 function createTodo(answers, done) {
 	load((error, todosData)=> {
 		if (error)	return done(error);
+		else {
+			const id = guid();
+			todosData.push({id: id, title: answers.title, description: answers.description, islike: false, comment: ""});
+			save(todosData,done);
 
-		const id = guid();
-		todosData.push({id: id, title: answers.title, description: answers.description, islike: false, comment: ""});
-		
-		save(todosData,done);
-
-		console.log('ID of new TODO: ', id);
+			console.log('ID of new TODO: ', id);
+		};
 	});
 }
 
 function updateTodo(answers, id, done) {
 	load((error, todosData)=> {
 		if (error)	return done(error);
+		else {
+			const index = todosData.findIndex(todo => todo.id === id);
 
-		const index = todosData.findIndex(todo => todo.id === id);
+			let todoComment = todosData[index].comment;
+			let todoIslike = todosData[index].islike;
+			let todoId = todosData[index].id;
+			todosData.splice(index, 1, {id: todoId, title: answers.title, description: answers.description, islike: todoIslike, comment: todoComment});
+			save(todosData,done);
 
-		let todoComment = todosData[index].comment;
-		let todoIslike = todosData[index].islike;
-		let todoId = todosData[index].id;
-		todosData.splice(index, 1, {id: todoId, title: answers.title, description: answers.description, islike: todoIslike, comment: todoComment});
-		save(todosData,done);
-
-		console.log('ID of updated TODO: ', id);
+			console.log('ID of updated TODO: ', id);
+		};
 	});
 }
 
 function removeTodo(id, done) {
 	load((error, todosData)=> {
 		if (error)	return done(error);
-
-		todosData = todosData.filter(todo => todo.id !== id);
-
-		save(todosData,done);
-
+		else {
+			todosData = todosData.filter(todo => todo.id !== id);
+			save(todosData,done);
+		}
 		//??
 	});
 }
@@ -99,52 +100,55 @@ function removeTodo(id, done) {
 function likeTodo(id, done) {
 	load((error, todosData)=> {
 		if (error)	return done(error);
+		else {
+			const index = todosData.findIndex(todo => todo.id === id);
 
-		const index = todosData.findIndex(todo => todo.id === id);
+			let todoTitle = todosData[index].title;
+			let todoDescription = todosData[index].description;
+			let todoComment = todosData[index].comment;
 
-		let todoTitle = todosData[index].title;
-		let todoDescription = todosData[index].description;
-		let todoComment = todosData[index].comment;
-
-		todosData.splice(index, 1, {id: id, title: todoTitle, description: todoDescription, islike: true, comment: todoComment });
+			todosData.splice(index, 1, {id: id, title: todoTitle, description: todoDescription, islike: true, comment: todoComment });
 		
-		save(todosData,done);
+			save(todosData,done);
 
-		console.log('ID of liked TODO: ', id);
+			console.log('ID of liked TODO: ', id);
+		}
 	});
 }
 
 function unlikeTodo(id, done) {
 	load((error, todosData)=> {
 		if (error)	return done(error);
+		else {
+			const index = todosData.findIndex(todo => todo.id === id);
 
-		const index = todosData.findIndex(todo => todo.id === id);
+			let todoTitle = todosData[index].title;
+			let todoDescription = todosData[index].description;
+			let todoComment = todosData[index].comment;
 
-		let todoTitle = todosData[index].title;
-		let todoDescription = todosData[index].description;
-		let todoComment = todosData[index].comment;
+			todosData.splice(index, 1, {id: id, title: todoTitle, description: todoDescription, islike: false, comment: todoComment });
+			save(todosData,done);
 
-		todosData.splice(index, 1, {id: id, title: todoTitle, description: todoDescription, islike: false, comment: todoComment });
-		save(todosData,done);
-
-		console.log('ID of unliked TODO: ', id);
+			console.log('ID of unliked TODO: ', id);
+		};
 	});
 }
 
 function commentTodo(answers, id, done) {
 	load((error, todosData)=> {
 		if (error)	return done(error);
+		else {
+			const index = todosData.findIndex(todo => todo.id === id);
 
-		const index = todosData.findIndex(todo => todo.id === id);
+			let todoTitle = todosData[index].title;
+			let todoDescription = todosData[index].description;
+			let todoIslike = todosData[index].islike;
 
-		let todoTitle = todosData[index].title;
-		let todoDescription = todosData[index].description;
-		let todoIslike = todosData[index].islike;
+			todosData.splice(index, 1, {id: id, title: todoTitle, description: todoDescription, islike: todoIslike, comment: answers.comment });
+			save(todosData,done);
 
-		todosData.splice(index, 1, {id: id, title: todoTitle, description: todoDescription, islike: todoIslike, comment: answers.comment });
-		save(todosData,done);
-
-		console.log('ID of commented TODO:',id);
+			console.log('ID of commented TODO:',id);
+		};
 	});
 }
 
@@ -198,8 +202,7 @@ program
   .action((done) => {
 		readTodos((error, todosData) => {
 			if (error)	return console.error(error.message);
-
-			todosData.forEach((todo, id) => console.log(`id: ${todo.id}\r\nTitle: ${todo.title}\r\nLiked: ${todo.islike}\r\nComment: ${todo.comment}\r\n\r\n --- \r\n`));
+			else todosData.forEach((todo, id) => console.log(`id: ${todo.id}\r\nTitle: ${todo.title}\r\nLiked: ${todo.islike}\r\nComment: ${todo.comment}\r\n\r\n --- \r\n`));
 		})
 	});
 
@@ -210,8 +213,7 @@ program
   .action((id) => {
 		showTodo(id, (error, todo) => {
 			if (error)	return console.error(error.message);
-
-			console.log(`id: ${todo.id}\r\n---\r\nTitle: ${todo.title}\r\nDescription: ${todo.description}\r\n---\r\nIs liked: ${todo.islike}\r\nComment: ${todo.comment}`);
+			else console.log(`id: ${todo.id}\r\n---\r\nTitle: ${todo.title}\r\nDescription: ${todo.description}\r\n---\r\nIs liked: ${todo.islike}\r\nComment: ${todo.comment}`);
 		});
 	});
 
@@ -221,14 +223,12 @@ program
   .description('Create new TODO item')
   .action(() => {
 		let answers;
-
 		prompt(createQuestions)
       .then((receivedAnswers) => {
 				answers = receivedAnswers;
         return createTodo(answers, error => {
 					if (error)	return console.error(error.message);
-
-					console.log('TODO created!')
+					else console.log('TODO created!');
 				});
 			})
   });
@@ -245,8 +245,7 @@ program
 				answers = receivedAnswers;
         return updateTodo(answers, id, error => {
 					if (error)	return console.error(error.message);
-
-					console.log('TODO updated!')
+					else console.log('TODO updated!');
 				});
 			})
   });
@@ -256,11 +255,9 @@ program
   .alias('rm')
   .description('Remove TODO item by id')
   .action((id) => {
-		removeTodo(id, error => {
-			
+		removeTodo(id, error => {	
 			if (error) return console.error(error.message);
-
-			console.log('TODO removed');
+			else console.log('TODO removed');
 		});
 	});
 
@@ -271,8 +268,7 @@ program
   .action((id) => {
     likeTodo(id, error => {
 			if (error)	return console.error(error.message);
-
-			console.log('TODO liked!')
+			else console.log('TODO liked!');
 		});
 	});
 
@@ -283,8 +279,7 @@ program
   .action((id) => {
     unlikeTodo(id, error => {
 			if (error)	return console.error(error.message);
-
-			console.log('TODO unliked!')
+			else console.log('TODO unliked!');
 		});
 	});
 
@@ -294,14 +289,12 @@ program
   .description('Comment TODO item')
   .action((id) => {
 		let answers;
-
     prompt(commentQuestions)
       .then((receivedAnswers) => {
 				answers = receivedAnswers;
         return commentTodo(answers, id, error => {
 					if (error)	return console.error(error.message);
-
-					console.log('TODO commented!')
+					else console.log('TODO commented!');
 				});
 			})
   });
